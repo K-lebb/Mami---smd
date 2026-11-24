@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CROMA — A Matemática das Cores</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">
+      <span class="logo-mark">◐</span>
+      <span class="logo-text">CROMA</span>
+    </div>
+    <nav class="nav">
+      <a href="#rgb">RGB / HEX</a>
+      <a href="#circulo">Círculo Cromático</a>
+      <a href="#contraste">Contraste</a>
+      <a href="#paletas">Paletas</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>A matemática<br /><span class="gradient-text">das cores</span></h1>
+      <p>
+        Explore como vetores, ângulos, proporções e funções estão por trás
+        das cores que você vê na tela. Mexa nos valores, observe os resultados
+        e descubra a matemática escondida no design.
+      </p>
+      <a href="#rgb" class="btn-primary">Começar a explorar →</a>
+    </div>
+    <div class="hero-visual">
+      <div class="color-orb orb-1"></div>
+      <div class="color-orb orb-2"></div>
+      <div class="color-orb orb-3"></div>
+    </div>
+  </section>
+
+  <section id="rgb" class="module">
+    <div class="module-header">
+      <span class="module-tag">Módulo 01</span>
+      <h2>RGB & HEX</h2>
+      <p>
+        Uma cor digital é um <strong>vetor tridimensional</strong> (R, G, B),
+        onde cada componente vai de 0 a 255. O código hexadecimal é a mesma
+        informação escrita em <strong>base 16</strong>.
+      </p>
+    </div>
+
+    <div class="rgb-layout">
+      <div class="rgb-preview" id="rgbPreview">
+        <span id="rgbHexLabel">#7C3AED</span>
+      </div>
+
+      <div class="rgb-controls">
+        <div class="slider-group">
+          <label>R <span id="valR">124</span></label>
+          <input type="range" id="rangeR" min="0" max="255" value="124" />
+        </div>
+        <div class="slider-group">
+          <label>G <span id="valG">58</span></label>
+          <input type="range" id="rangeG" min="0" max="255" value="58" />
+        </div>
+        <div class="slider-group">
+          <label>B <span id="valB">237</span></label>
+          <input type="range" id="rangeB" min="0" max="255" value="237" />
+        </div>
+        <div class="rgb-math">
+          <p>RGB → <code id="rgbCode">rgb(124, 58, 237)</code></p>
+          <p>HEX → <code id="hexCode">#7C3AED</code></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="circulo" class="module alt">
+    <div class="module-header">
+      <span class="module-tag">Módulo 02</span>
+      <h2>Círculo Cromático</h2>
+      <p>
+        As cores podem ser posicionadas em uma circunferência pelo seu
+        <strong>ângulo (matiz)</strong>. Relações geométricas geram
+        combinações harmônicas: <em>complementares (180°)</em>,
+        <em>análogas (±30°)</em> e <em>tríades (120°)</em>.
+      </p>
+    </div>
+
+    <div class="wheel-layout">
+      <div class="wheel-container">
+        <canvas id="colorWheel" width="320" height="320"></canvas>
+        <div class="wheel-marker" id="wheelMarker"></div>
+      </div>
+
+      <div class="wheel-controls">
+        <label>Matiz base (H): <span id="hueLabel">260°</span></label>
+        <input type="range" id="hueSlider" min="0" max="360" value="260" />
+
+        <div class="harmony-buttons">
+          <button data-harmony="complementar">Complementar</button>
+          <button data-harmony="analogas">Análogas</button>
+          <button data-harmony="triade">Tríade</button>
+        </div>
+
+        <div class="harmony-palette" id="harmonyPalette"></div>
+        <p class="harmony-desc" id="harmonyDesc">
+          Escolha um tipo de harmonia para ver as cores geradas.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contraste" class="module">
+    <div class="module-header">
+      <span class="module-tag">Módulo 03</span>
+      <h2>Contraste & Acessibilidade</h2>
+      <p>
+        A <strong>razão de contraste</strong> entre texto e fundo é calculada
+        a partir da <em>luminância relativa</em> das cores — uma proporção que
+        garante legibilidade. A WCAG recomenda mínimo de <strong>4.5:1</strong>
+        para texto normal.
+      </p>
+    </div>
+
+    <div class="contrast-layout">
+      <div class="contrast-controls">
+        <div class="color-input">
+          <label>Cor do texto</label>
+          <input type="color" id="textColor" value="#ffffff" />
+        </div>
+        <div class="color-input">
+          <label>Cor do fundo</label>
+          <input type="color" id="bgColor" value="#7c3aed" />
+        </div>
+      </div>
+
+      <div class="contrast-preview" id="contrastPreview">
+        <h3>Exemplo de texto</h3>
+        <p>Este é um parágrafo de exemplo para verificar a legibilidade.</p>
+      </div>
+
+      <div class="contrast-result" id="contrastResult">
+        <span class="ratio" id="ratioValue">—</span>
+        <span class="badge" id="contrastBadge">—</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="paletas" class="module alt">
+    <div class="module-header">
+      <span class="module-tag">Módulo 04</span>
+      <h2>Gerador de Paletas</h2>
+      <p>
+        Uma paleta pode nascer da <strong>interpolação</strong> entre duas
+        cores: funções lineares que variam cada componente RGB
+        progressivamente. Gere, copie e use em seus projetos.
+      </p>
+    </div>
+
+    <div class="palette-layout">
+      <div class="palette-controls">
+        <div class="color-input">
+          <label>Cor inicial</label>
+          <input type="color" id="paletteStart" value="#7c3aed" />
+        </div>
+        <div class="color-input">
+          <label>Cor final</label>
+          <input type="color" id="paletteEnd" value="#f59e0b" />
+        </div>
+        <button class="btn-primary" id="generatePalette">Gerar paleta</button>
+      </div>
+
+      <div class="palette-strip" id="paletteStrip"></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>
+      <strong>CROMA</strong> · Projeto de extensão — Matemática Aplicada à Multimídia
+      · Sistemas e Mídias Digitais · UFC
+    </p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
