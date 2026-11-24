@@ -177,6 +177,60 @@
     </div>
   </section>
 
+    <section id="estatistica" class="module">
+    <div class="module-header">
+        <span class="module-tag">Módulo 05</span>
+        <h2>Estatística dos Tons de Cinza</h2>
+        <p>
+        Cada pixel pode ser convertido em um <strong>tom de cinza</strong> pela
+        combinação linear <code>0.299·R + 0.587·G + 0.114·B</code>. A partir
+        disso calculamos <strong>média</strong>, <strong>variância</strong> e
+        <strong>desvio padrão</strong> — medidas matemáticas que revelam
+        o contraste e a distribuição tonal de uma imagem.
+        </p>
+    </div>
+
+    <div class="stats-uploads">
+        <div class="upload-box" id="uploadBox1">
+        <input type="file" accept="image/*" id="fileInput1" hidden />
+        <div class="upload-placeholder" id="placeholder1">
+            <span class="upload-icon">📷</span>
+            <strong>Imagem 1</strong>
+            <small>Clique ou arraste uma imagem</small>
+        </div>
+        <img class="upload-preview" id="preview1" alt="" />
+        </div>
+
+        <div class="upload-box" id="uploadBox2">
+        <input type="file" accept="image/*" id="fileInput2" hidden />
+        <div class="upload-placeholder" id="placeholder2">
+            <span class="upload-icon">📷</span>
+            <strong>Imagem 2 (opcional)</strong>
+            <small>Clique ou arraste uma imagem</small>
+        </div>
+        <img class="upload-preview" id="preview2" alt="" />
+        </div>
+    </div>
+
+    <details class="formulas">
+        <summary>📐 Como a matemática aparece aqui</summary>
+        <div class="formulas-body">
+        <p><strong>Tom de cinza:</strong> <code>T = 0.299·R + 0.587·G + 0.114·B</code></p>
+        <p><strong>Média:</strong> <code>μ = (1/N) · Σ T<sub>i</sub></code></p>
+        <p><strong>Variância:</strong> <code>σ² = (1/N) · Σ (T<sub>i</sub> − μ)²</code></p>
+        <p><strong>Desvio padrão:</strong> <code>σ = √σ²</code></p>
+        <p class="formulas-note">
+            Quanto maior a variância, mais espalhados estão os tons — ou seja,
+            maior é o contraste interno da imagem.
+        </p>
+        </div>
+    </details>
+
+    <div class="stats-results" id="statsResults">
+        <p class="stats-empty">Envie ao menos uma imagem para começar a análise.</p>
+    </div>
+    </section>
+
   <footer class="footer">
     <p>
       <strong>CROMA</strong> · Projeto de extensão — Matemática Aplicada à Multimídia

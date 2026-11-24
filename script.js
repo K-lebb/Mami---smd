@@ -263,3 +263,234 @@ generatePaletteBtn.addEventListener('click', generatePalette);
 paletteStart.addEventListener('input', generatePalette);
 paletteEnd.addEventListener('input', generatePalette);
 generatePalette();
+
+function analisarImagem(img) {
+  return new Promise((resolve, reject) => {
+    try {
+      const MAX_W = 800;
+      const escala = Math.min(1, MAX_W / img.naturalWidth);
+      const w = Math.round(img.naturalWidth * escala);
+      const h = Math.round(img.naturalHeight * escala);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const { data } = ctx.getImageData(0, 0, w, h);
+      const total = w * h;
+
+      const tons = new Float32Array(total);
+      let soma = 0;
+
+      for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        const tom = 0.299 * r + 0.587 * g + 0.114 * b;
+        tons[p] = tom;
+        soma += tom;
+      }
+
+      const media = soma / total;
+
+      let somaDif = 0;
+      const histograma = new Array(256).fill(0);
+
+      for (let p = 0; p < total; p++) {
+        const t = tons[p];
+        somaDif += (t - media) ** 2;
+        histograma[Math.min(255, Math.floor(t))]++;
+      }
+
+      const variancia = somaDif / total;
+      const desvioPadrao = Math.sqrt(variancia);
+
+      resolve({ media, variancia, desvioPadrao, histograma, total });
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+const uploads = [
+  {
+    box: document.getElementById('uploadBox1'),
+    input: document.getElementById('fileInput1'),
+    preview: document.getElementById('preview1'),
+    resultado: null,
+    nomeArquivo: null,
+  },
+  {
+    box: document.getElementById('uploadBox2'),
+    input: document.getElementById('fileInput2'),
+    preview: document.getElementById('preview2'),
+    resultado: null,
+    nomeArquivo: null,
+  },
+];
+
+const statsResults = document.getElementById('statsResults');
+
+function registrarUpload(slotIndex) {
+  const slot = uploads[slotIndex];
+
+  slot.box.addEventListener('click', () => slot.input.click());
+
+  slot.input.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) processarArquivo(slotIndex, file);
+  });
+
+  slot.box.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    slot.box.classList.add('dragover');
+  });
+  slot.box.addEventListener('dragleave', () => {
+    slot.box.classList.remove('dragover');
+  });
+  slot.box.addEventListener('drop', (e) => {
+    e.preventDefault();
+    slot.box.classList.remove('dragover');
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      processarArquivo(slotIndex, file);
+    }
+  });
+}
+
+async function processarArquivo(slotIndex, file) {
+  const slot = uploads[slotIndex];
+
+  if (!file.type.startsWith('image/')) {
+    alert('Por favor, envie um arquivo de imagem.');
+    return;
+  }
+  if (file.size > 15 * 1024 * 1024) {
+    alert('Imagem muito grande (máx. 15MB).');
+    return;
+  }
+
+  slot.nomeArquivo = file.name;
+  renderizarLoading();
+
+  try {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const img = new Image();
+    img.src = dataUrl;
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+    });
+
+    slot.preview.src = dataUrl;
+    slot.box.classList.add('has-image');
+
+    slot.resultado = await analisarImagem(img);
+
+    renderizarResultados();
+  } catch (err) {
+    console.error(err);
+    alert('Não foi possível processar a imagem.');
+  }
+}
+
+function renderizarLoading() {
+  statsResults.innerHTML = `
+    <p class="stats-empty">Processando imagem...<span class="stat-loading"></span></p>
+  `;
+}
+
+function renderizarResultados() {
+  const comResultado = uploads.filter((u) => u.resultado);
+
+  if (comResultado.length === 0) {
+    statsResults.innerHTML = `
+      <p class="stats-empty">Envie ao menos uma imagem para começar a análise.</p>
+    `;
+    return;
+  }
+
+  let vencedoraIndex = -1;
+  if (uploads[0].resultado && uploads[1].resultado) {
+    vencedoraIndex =
+      uploads[0].resultado.variancia >= uploads[1].resultado.variancia
+        ? 0
+        : 1;
+  }
+
+  statsResults.innerHTML = '';
+
+  uploads.forEach((slot, idx) => {
+    if (!slot.resultado) return;
+
+    const r = slot.resultado;
+    const card = document.createElement('div');
+    card.className = 'stat-card' + (idx === vencedoraIndex ? ' winner' : '');
+
+    // Histograma normalizado para 64 barras (visual compacto)
+    const buckets = 64;
+    const hist = new Array(buckets).fill(0);
+    r.histograma.forEach((v, i) => {
+      hist[Math.floor((i / 256) * buckets)] += v;
+    });
+    const maxHist = Math.max(...hist);
+    const barras = hist
+      .map((v) => `<div style="height:${(v / maxHist) * 100}%"></div>`)
+      .join('');
+
+    card.innerHTML = `
+      <h3>${slot.nomeArquivo || `Imagem ${idx + 1}`}</h3>
+      <div class="stat-row">
+        <span>Resolução analisada</span>
+        <span>${r.total.toLocaleString('pt-BR')} px</span>
+      </div>
+      <div class="stat-row">
+        <span>Média (μ)</span>
+        <span>${r.media.toFixed(2)}</span>
+      </div>
+      <div class="stat-row">
+        <span>Variância (σ²)</span>
+        <span>${r.variancia.toFixed(2)}</span>
+      </div>
+      <div class="stat-row">
+        <span>Desvio padrão (σ)</span>
+        <span>${r.desvioPadrao.toFixed(2)}</span>
+      </div>
+      <div class="stat-histogram" title="Distribuição dos tons de cinza (0–255)">
+        ${barras}
+      </div>
+    `;
+
+    statsResults.appendChild(card);
+  });
+
+  if (vencedoraIndex !== -1) {
+    const vencedora = uploads[vencedoraIndex];
+    const perdedora = uploads[1 - vencedoraIndex];
+
+    const razao = (vencedora.resultado.variancia /
+      Math.max(perdedora.resultado.variancia, 0.0001)).toFixed(2);
+
+    const verdict = document.createElement('div');
+    verdict.className = 'stats-verdict';
+    verdict.innerHTML = `
+      A imagem <strong>${vencedora.nomeArquivo}</strong> possui maior variação
+      de tons (${vencedora.resultado.variancia.toFixed(2)} contra
+      ${perdedora.resultado.variancia.toFixed(2)}). A variância é
+      <strong>${razao}×</strong> maior — ou seja, mais contraste interno.
+    `;
+    statsResults.appendChild(verdict);
+  }
+}
+
+registrarUpload(0);
+registrarUpload(1);
